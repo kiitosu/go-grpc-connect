@@ -4,17 +4,16 @@ FROM golang:alpine3.21 AS builder
 # Dockerコンテナ内の作業ディレクトリ
 WORKDIR /app
 
-# go.modとgo.sumをDockerコンテナにコピー
-COPY go.mod go.sum ./
+# go.modとgo.sum、ソースコードをDockerコンテナにコピー
+COPY ./backend ./
+# bufで生成したインターフェースをコピー
+COPY ./gen ./gen
 
 # Docker コンテナでモジュールをダウンロード
 RUN go mod download
 
-# ソースコードをDockerコンテナにコピー
-COPY . .
-
 # gRPCサーバーをビルド
-RUN go build -o bin/server ./cmd/server/main.go
+RUN go build -o bin/server cmd/main.go
 
 # gRPCサーバの実行環境
 FROM alpine:latest AS server
