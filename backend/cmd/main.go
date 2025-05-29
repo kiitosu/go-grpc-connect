@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"connectrpc.com/connect"
+	"github.com/rs/cors"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 
@@ -28,6 +29,14 @@ func (s *GreetServer) Greet(
 	return res, nil
 }
 
+func withCORS(h http.Handler) http.Handler {
+    return cors.New(cors.Options{
+        AllowedOrigins:   []string{"http://localhost:5173"},
+        AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
+        AllowedHeaders:   []string{"Content-Type", "X-User-Agent", "Connect-Protocol-Version"},
+    }).Handler(h)
+}
+
 func main() {
 	// greeterサービスを生成
 	greeter := &GreetServer{}
@@ -43,6 +52,6 @@ func main() {
 	http.ListenAndServe(
 		"0.0.0.0:8080",
 		// Use h2c so we can serve HTTP/2 without TLS.
-		h2c.NewHandler(mux, &http2.Server{}),
+		withCORS(h2c.NewHandler(mux, &http2.Server{})),
 	)
 }

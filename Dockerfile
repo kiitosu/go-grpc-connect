@@ -6,8 +6,6 @@ WORKDIR /app
 
 # go.modとgo.sum、ソースコードをDockerコンテナにコピー
 COPY ./backend ./
-# bufで生成したインターフェースをコピー
-COPY ./gen ./gen
 
 # Docker コンテナでモジュールをダウンロード
 RUN go mod download
@@ -22,6 +20,6 @@ WORKDIR /app
 
 COPY --from=builder /app/bin/server .
 
-EXPOSE 50051
+EXPOSE 8080
 
 ENTRYPOINT ["./server"]

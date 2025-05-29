@@ -1,35 +1,34 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+
+// src/App.tsx
+import { createClient } from "@connectrpc/connect";
+import { createConnectTransport } from "@connectrpc/connect-web";
+
+// 接続したいサービスをインポート
+import { GreetService } from "../gen/greet/v1/greet_pb";
+
+// transportではどのタイプのエンドポイントを使うか定義します
+// 今回はConnect endpointを使います。
+// エンドポイントが`g-RPC-web`しか対応していない場合は`createGrpcWebTransport`を使ってください
+const transport = createConnectTransport({
+    baseUrl: "http://localhost:8080"
+})
+
+// サービス定義とtransportを組み合わせてクライアントを作ります
+const client = createClient(GreetService, transport)
 
 function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+    const[inputValue, setInputValue] = useState("")
+    return <>
+        <form onSubmit={async (e) => {
+            e.preventDefault(); // ページリロードを避ける
+            await client.greet({
+                name: inputValue
+            })
+        }}>
+            <input value={inputValue} onChange={e =>setInputValue(e.target.value)}/>
+            <button type="submit">Send</button>
+        </form>
     </>
-  )
 }
-
 export default App
