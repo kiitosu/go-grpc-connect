@@ -18,17 +18,27 @@ const transport = createConnectTransport({
 const client = createClient(GreetService, transport)
 
 function App() {
-    const[inputValue, setInputValue] = useState("")
+    const[requestState, setRequest] = useState("")
+    const [responseState, setResponse] = useState<string[]>([]);
     return <>
         <form onSubmit={async (e) => {
             e.preventDefault(); // ページリロードを避ける
-            await client.greet({
-                name: inputValue
+            const response = await client.greet({
+                name: requestState
             })
+            setResponse([...responseState, response.greeting])
         }}>
-            <input value={inputValue} onChange={e =>setInputValue(e.target.value)}/>
+            <input value={requestState} onChange={e =>setRequest(e.target.value)}/>
             <button type="submit">Send</button>
         </form>
+
+        <>
+            {
+                responseState.map( item => (
+                    <li>{item}</li>
+                ))
+            }
+        </>
     </>
 }
 export default App
